@@ -53,7 +53,7 @@ steps <- tbl_df(activity)
 ```
 
 
-## What is mean total number of steps taken per day?
+## What is the mean total number of steps taken per day?
 
 Grouping by date should work nicely here.
 
@@ -100,14 +100,13 @@ ggplot(DailyActivity, aes(dailySteps)) +
             angle=90,
             vjust=c(1.6, -1.6),
             hjust=c(-1.8, -2),
-            color=c('red', 'black'))
+            color=c('red', 'black')) +
+  labs(x='Average number of steps taken in a day',
+       y='Number of days (count)',
+       title='Mean total number of steps taken (per day)')
 ```
 
 ![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png) 
-
-```r
-# TODO: labels
-```
 
 
 ## What is the average daily activity pattern?
@@ -157,16 +156,15 @@ ggplot(DailyPattern, aes(time, meanSteps, group=1)) +
             hjust=0.2,
             color='red') +
   scale_x_continuous(breaks=seq(0, 1435, by=60),
-                     labels=function(x) { paste(x/60, ':', str_pad(x%%60, 2, pad='0'), sep='')})
+                     labels=function(x) { paste(x/60, ':', str_pad(x%%60, 2, pad='0'), sep='')}) +
+  labs(x='Time (in 5-min intervals)',
+       y='Mean number of steps for interval',
+       title='Average daily activity pattern (in steps)')
 ```
 
 ![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png) 
 
-```r
-# TODO: labels
-```
-
-The 5-min interval at 8:35 contains the largest mean value of steps, possibly corresponding to the middle of a morning jog or running to work.
+The 5-min interval at 8:35 contains the __largest mean value of steps__, possibly corresponding to the middle of a morning jog or running to work.
 
 ## Imputing missing values
 
@@ -282,15 +280,15 @@ ggplot(DailyActivity_imputed, aes(dailySteps)) +
             angle=90,
             vjust=c(1.6, -1.6),
             hjust=c(-1.8, -2),
-            color=c('red', 'black'))
+            color=c('red', 'black')) +
+  labs(x='Average number of steps taken in a day',
+       y='Number of days (count)',
+       title='Mean total number of steps taken (per day) (imputed)')
 ```
 
 ![plot of chunk unnamed-chunk-13](figure/unnamed-chunk-13-1.png) 
 
-```r
-# TODO: adjust labels + cosmetic changes
-```
-In the calculation of mean daily steps, NA values act as silent zeros. Therefore the adopted impute strategy necessarily errs on the side of __more steps__. This can be seen in the histogram where the bars have larger height than the ones for the dataset with NA values ignored. The mean and median are also higher. The number of steps added to the dataset by the imputation strategy is
+In the calculation of mean daily steps, NA values act as silent zeros. Therefore the adopted impute strategy necessarily errs on the side of __more steps__. The number of steps added to the dataset by the imputation strategy is
 
 
 ```r
@@ -301,12 +299,16 @@ sum(DailyActivity_imputed$dailySteps) - sum(DailyActivity$dailySteps, na.rm=T)
 ## [1] 85128
 ```
 
-In addition, this strategy also has a "smoothing" effect since:
+There is almost a 13% increase in the number of steps after imputing the missing values, about the same amount that were missing in the original dataset. This can be seen in the histogram where the bars have larger height than the ones for the dataset with NA values ignored. The mean and median are also higher. In this sense, the imputation strategy introduces its own bias.
+
+On the other hand, this strategy has a "smoothing" effect since:
 
  * The differences in the mean and median statistics are smaller than the differences of the bars between the two histograms.
  * The histogram is more closely balanced around the bar corresponding to the number of days for which the highest number of steps were taken.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+A factor variable can be introduced to slice the data into 'weekend' and 'weekday' bins. Otherwise, the same approach as in the daily pattern is followed.
 
 
 ```r
@@ -329,13 +331,29 @@ ggplot(WeeklyPattern, aes(time, meanSteps, group=week)) +
   geom_line(aes(col=week)) +
   theme(axis.text.x=element_text(angle=45,vjust=.5, hjust=.8, size=10)) +
   scale_x_continuous(breaks=seq(0, 1435, by=60),
-                     labels=function(x) { paste(x/60, ':', str_pad(x%%60, 2, pad='0'), sep='')})
+                     labels=function(x) { paste(x/60, ':', str_pad(x%%60, 2, pad='0'), sep='')}) +
+  labs(x='Time (in 5-min intervals)',
+       y='Mean number of steps for interval',
+       title='Activity pattern comparison of weekdays and weekends (in steps)')
 ```
 
 ![plot of chunk unnamed-chunk-16](figure/unnamed-chunk-16-1.png) 
 
+A panel plot of the same data.
+
+
 ```r
-# TODO: labels
+ggplot(WeeklyPattern, aes(time, meanSteps)) +
+  geom_line(aes(col=week)) +
+  facet_wrap(~week, ncol=1) +
+  theme(axis.text.x=element_text(angle=45,vjust=.5, hjust=.8, size=10)) +
+  scale_x_continuous(breaks=seq(0, 1435, by=60),
+                     labels=function(x) { paste(x/60, ':', str_pad(x%%60, 2, pad='0'), sep='')}) +
+  labs(x='Time (in 5-min intervals)',
+       y='Mean number of steps for interval',
+       title='Activity pattern comparison of weekdays and weekends (in steps)')
 ```
 
-The weekend pattern shows more even high activity, possibly corresponding to day- or weekend-long recreational activities.
+![plot of chunk unnamed-chunk-17](figure/unnamed-chunk-17-1.png) 
+
+The weekend pattern shows a more even high-activity pattern, possibly corresponding to day- or weekend-long recreational activities or house cleaning. The weekend activity is more sustained, and starts and stops later in the day, in comparison to the weekday pattern.
